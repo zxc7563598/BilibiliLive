@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>直播间状态变更</title>
+</head>
+
+<body>
+    <?=htmlspecialchars($name)?>
+    <br>
+    标题：
+    <?=htmlspecialchars($title)?>
+    <br>
+    类型：
+    <?=htmlspecialchars($type)?>
+    <br>
+    分区：
+    <?=htmlspecialchars($area)?>
+    <br>
+    时间：
+    <?=htmlspecialchars($date)?>
+    <br>
+    直播间链接：<a href="https://live.bilibili.com/26507836">快速进入</a>
+    <? if(!empty($times)){ ?>
+    <br>
+    本次直播时间：
+    <?=htmlspecialchars($times)?>
+    <? } ?>
+</body>
+
+</html>

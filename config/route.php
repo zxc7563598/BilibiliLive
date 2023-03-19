@@ -14,6 +14,8 @@
 
 use Webman\Route;
 
+Route::any('/recorder/webhook', [app\controller\recorder\CallbackController::class, 'webHook']); // 录播姬 webhook 通知
+
 
 
 

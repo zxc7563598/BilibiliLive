@@ -23,4 +23,6 @@ return [
     'runtime_path' => base_path(false) . DIRECTORY_SEPARATOR . 'runtime',
     'controller_suffix' => 'Controller',
     'controller_reuse' => false,
+    'app_name' => getenv('SYSTEM_APP_NAME'),
+    'product_name' => getenv('SYSTEM_PRODUCT_NAME'),
 ];
