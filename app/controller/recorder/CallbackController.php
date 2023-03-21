@@ -23,12 +23,11 @@ class CallbackController
     public function webHook(Request $request): string
     {
         $param = $request->all();
-        sublog('接口调用', '录播姬回调', $param);
-        sublog('接口调用', '录播姬回调', $request->getRealIp());
-        sublog('接口调用', '录播姬回调', '===================');
+        sublog('录播姬接口', '录播姬回调', $param);
+        sublog('录播姬接口', '录播姬回调', $request->getRealIp());
+        sublog('录播姬接口', '录播姬回调', '===================');
         $type = $param['EventType'];
         $timestamp = $param['EventTimestamp'];
-        $id = $param['EventId'];
         $data = $param['EventData'];
         // 数据无误，验证类型
         switch ($type) {
@@ -132,6 +131,45 @@ class CallbackController
                     ]);
                 }
                 break;
+        }
+        return 'success';
+    }
+
+    public function webHookTest(Request $request)
+    {
+        $param = $request->all();
+        $live_files_list = LiveFiles::where('status', 0)->get();
+        $res = [];
+        foreach ($live_files_list as $live_files) {
+            $res[] = $live_files;
+            Client::send('baidu-netbook-upload', [
+                'files_id' => $live_files->files_id,
+                'files_path' => $live_files->files_path,
+                'files_name' => $live_files->files_name
+            ]);
+        }
+        return success($request, $res);
+    }
+
+    /**
+     * 录播文件上传回调
+     *
+     * @param string $files_id 文件id
+     * @param integer $success 是否上传成功
+     * 
+     * @return string
+     */
+    public function fileCallback(Request $request): string
+    {
+        $param = $request->all();
+        sublog('录播姬接口', '文件上传回调', $param);
+        $files_id = $param['files_id'];
+        $success = $param['success'];
+        // 获取数据进行处理
+        $live_files = LiveFiles::where('files_id', $files_id)->first();
+        if (!empty($live_files)) {
+            $live_files->status = $success == 1 ? LiveFilesEnums\Status::UploadSuccessful->value : LiveFilesEnums\Status::UploadFailed->value;
+            $live_files->save();
         }
         return 'success';
     }

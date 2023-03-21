@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of webman.
  *
@@ -38,5 +39,8 @@ return [
                 'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',
             ]
         ]
+    ],
+    'danmu' => [
+        'handler' => process\DanmuMonitoring::class,
     ]
 ];

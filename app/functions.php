@@ -36,7 +36,7 @@ function success($request, $data = []): Response
 {
     $request->res = [
         'code' => 0,
-        'message' => trans(config('code')[0]),
+        'message' => config('code')[0],
         'data' => empty($data) ? (object)[] : $data
     ];
     return json($request->res, JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES + JSON_PRESERVE_ZERO_FRACTION);
@@ -62,7 +62,7 @@ function fail($request, $code = 500, $data = []): Response
     sublog('接口异常', str_replace('/', '-', $request->route->getPath()), $request->all());
     $request->res = [
         'code' => $code,
-        'message' => trans(config('code')[$code]),
+        'message' => config('code')[$code],
         'data' => empty($data) ? (object)[] : $data
     ];
     sublog('接口异常', str_replace('/', '-', $request->route->getPath()), $request->res);

@@ -24,19 +24,11 @@ class BaiduNetbookUpload implements Consumer
         $live_files->status = LiveFilesEnums\Status::InUpload->value;
         $live_files->save();
         // 路径处理
+        $python = public_path() . '/BaiduNetworkDisk.py';
         $local_path = $data['files_path'] . '/' . $data['files_name'];
         $upload_path = $data['files_path'] . '/' . $data['files_name'];
         // 执行 python 脚本
-        $command = 'python3 /www/wwwroot/Bd/baidu.py ' . $local_path . ' ' . $upload_path;
+        $command = 'python3 ' . $python . ' ' . $local_path . ' ' . $upload_path . ' ' . $live_files->files_id . '  > /root/录播上传.log 2>&1 &';
         exec($command, $output, $return_val);
-        if (count($output) == 1 && $output[0] == 'success') {
-            // 上传成功
-            $live_files->status = LiveFilesEnums\Status::UploadSuccessful->value;
-            $live_files->save();
-        } else {
-            // 上传失败
-            $live_files->status = LiveFilesEnums\Status::UploadFailed->value;
-            $live_files->save();
-        }
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of webman.
  *
@@ -15,9 +16,5 @@
 use Webman\Route;
 
 Route::any('/recorder/webhook', [app\controller\recorder\CallbackController::class, 'webHook']); // 录播姬 webhook 通知
-
-
-
-
-
-
+Route::any('/recorder/webhook/test', [app\controller\recorder\CallbackController::class, 'webHookTest']); // 录播姬 webhook 通知测试
+Route::any('/recorder/file-callback', [app\controller\recorder\CallbackController::class, 'fileCallback']); // 录播姬录制视频上传回调
