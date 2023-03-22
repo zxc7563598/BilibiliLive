@@ -17,8 +17,35 @@ use Webman\RedisQueue\Client;
 
 class LiveInstructionController
 {
+
     /**
-     * 获取直播信息
+     * 获取特定主播当前是否在直播
+     *
+     * @param string $room_id 房间号
+     * 
+     * @return string
+     */
+    public function liveStatus(Request $request): string
+    {
+        $param = $request->all();
+        sublog('系统接口', '获取特定主播当前是否在直播', $param);
+        $room_id = $param['room_id'];
+        // 获取信息
+        if (!empty(Redis::hGet(config('app')['app_name'] . ':recorder:list', $room_id))) {
+            $message = '这位主播现在正在直播，请稍等，我会帮你跳转到她的直播间' . "\r\n" . '<br>';
+        } else {
+            $live_record = LiveRecord::where('room_id', $room_id)->orderBy('start_time', 'desc')->first();
+            $message = '当前这位主播暂时还没有直播' . "\r\n" . '<br>';
+            if (!empty($live_record)) {
+                $message .= '我这边查询到她最后一次直播是在' . Carbon::parse($live_record['start_time'])->timezone(config('app.timezone'))->format('m月d日') . "\r\n" . '<br>';
+                $message .= '那一次他直播了' . sec2Time($live_record['duration']);
+            }
+        }
+        return $message;
+    }
+
+    /**
+     * 获取某日直播的详细信息
      *
      * @param string $room_id 房间号
      * @param string $date 日期
@@ -28,7 +55,7 @@ class LiveInstructionController
     public function liveInfo(Request $request): string
     {
         $param = $request->all();
-        sublog('系统接口', '获取直播间信息', $param);
+        sublog('系统接口', '获取某日直播的详细信息', $param);
         $room_id = $param['room_id'];
         $start_time = Carbon::parse($param['date'] . ' 00:00:00')->timezone(config('app.timezone'))->timestamp;
         $end_time = Carbon::parse($param['date'] . ' 23:59:59')->timezone(config('app.timezone'))->timestamp;
@@ -61,11 +88,11 @@ class LiveInstructionController
                 $live_gift = self::giftInfo($live_id);
                 $live_danmu = self::danmuInfo($live_id);
             }
-            $message .= '是这样的，我这边有查询到' . $name . '在' . Carbon::parse($param['date'])->timezone(config('app.timezone'))->format('m-d') . '的直播信息。' . "\r\n" . '<br>';
+            $message .= '是这样的，我这边有查询到：' . $name . ' 在' . Carbon::parse($param['date'])->timezone(config('app.timezone'))->format('m月d日') . '的直播信息。' . "\r\n" . '<br>';
             if ($duration) {
                 $message .= '他在那一天播了' . $live_record->count() . '场。' . "\r\n" . '<br>';
                 if ($live_record->count() == 1) {
-                    $message .= Carbon::parse($live_record[0]['start_time'])->timezone(config('app.timezone'))->format('H:i') . '开始，' . Carbon::parse($live_record[0]['down_time'])->timezone(config('app.timezone'))->format('H:i') . '结束。' . "\r\n" . '<br>';
+                    $message .= Carbon::parse($live_record[0]['start_time'])->timezone(config('app.timezone'))->format('H点i分') . '开始，' . Carbon::parse($live_record[0]['down_time'])->timezone(config('app.timezone'))->format('H点i分') . '结束。' . "\r\n" . '<br>';
                 }
                 $message .= '共计' . sec2Time($duration) . '。' . "\r\n" . '<br>';
             }
@@ -75,7 +102,7 @@ class LiveInstructionController
                 foreach ($live_danmu as $_live_danmu) {
                     $danmu += $_live_danmu['num'];
                 }
-                $message .= '一共有' . count($live_danmu) . '位用户累计发送了' . $danmu . '条弹幕。';
+                $message .= '一共有' . count($live_danmu) . '位用户，累计发送了' . $danmu . '条弹幕。';
                 if (count($live_danmu) > 3) {
                     $message .= '其中发言最多的人是：' . $live_danmu[0]['uname'] . '。' . "\r\n" . '<br>';
                     $message .= '他一个人就发送了' . $live_danmu[0]['num'] . '条弹幕。' . "\r\n" . '<br>';
@@ -83,7 +110,7 @@ class LiveInstructionController
                     $message .= '分别发送了' . $live_danmu[1]['num'] . '条 与 ' . $live_danmu[2]['num'] . '条。' . "\r\n" . '<br>';
                     $danmu_rate = number_format((round((($live_danmu[0]['num'] + $live_danmu[1]['num'] + $live_danmu[2]['num']) / $danmu), 4) * 100), 2);
                     if ($danmu_rate > 10) {
-                        $message .= '他们三个人就占据了全天直播 ' . $danmu_rate . '% 的弹幕量，看起来直播间的其他人都不是很活跃。' . "\r\n" . '<br>';
+                        $message .= '他们三个人占据了全天直播 ' . $danmu_rate . '% 的弹幕量，看起来直播间的其他人都不是很活跃。' . "\r\n" . '<br>';
                     }
                 }
             }
@@ -131,7 +158,14 @@ class LiveInstructionController
         return $message;
     }
 
-    private static function giftInfo($live_id)
+    /**
+     * 获取直播场次的礼物信息
+     *
+     * @param array $live_id 直播id
+     * 
+     * @return array
+     */
+    private static function giftInfo($live_id): array
     {
         // 获取礼物信息
         $live_gift = LiveGift::where('gift_type', '<>', 5)->whereIn('live_id', $live_id)->get([
@@ -173,7 +207,14 @@ class LiveInstructionController
         return arraySort($gift, 'price', 'desc');
     }
 
-    private static function danmuInfo($live_id)
+    /**
+     * 获取直播场次的弹幕信息
+     *
+     * @param array $live_id 直播id
+     * 
+     * @return array
+     */
+    private static function danmuInfo($live_id): array
     {
         $live_danmu = SupportDb::select("select uname,count(*) as 'num' from bili_live_danmu where live_id in (:live_id) and uid != :uid group by uid", ['live_id' => implode(',', $live_id), 'uid' => '3493141330004769']);
         $danmu = [];
