@@ -38,7 +38,7 @@ class LiveInstructionController
             $message = '当前这位主播暂时还没有直播。' . "\r\n" . '<br>';
             if (!empty($live_record)) {
                 $message .= '我这边查询到她最后一次直播是在' . Carbon::parse($live_record['start_time'])->timezone(config('app.timezone'))->format('m月d日') . '。' . "\r\n" . '<br>';
-                $message .= '那一次他直播了' . sec2Time($live_record['duration']) . '。';
+                $message .= '那一次她直播了' . sec2Time($live_record['duration']) . '。';
             }
         }
         return $message;
