@@ -151,3 +151,25 @@ function arraySort($array, $sortRule = "", $order = "asc")
     }
     return $array;
 }
+
+/**
+ * 字符串替换
+ *
+ * @param string $search 搜索值
+ * @param string $replace 替换值
+ * @param string $subject 操作字符串
+ * 
+ * @return string
+ */
+function replaceFirst($search, $replace, $subject): string
+{
+    if ($search === '') {
+        return $subject;
+    }
+    $position = strpos($subject, $search);
+
+    if ($position !== false) {
+        return substr_replace($subject, $replace, $position, strlen($search));
+    }
+    return $subject;
+}

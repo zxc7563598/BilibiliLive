@@ -138,7 +138,7 @@ class CallbackController
     public function webHookTest(Request $request)
     {
         $param = $request->all();
-        $live_files_list = LiveFiles::where('status', 0)->get();
+        $live_files_list = LiveFiles::whereIn('status', [0, 2, 4])->get();
         $res = [];
         foreach ($live_files_list as $live_files) {
             $res[] = $live_files;
@@ -166,7 +166,7 @@ class CallbackController
         $files_id = $param['files_id'];
         $success = $param['success'];
         // 获取数据进行处理
-        $live_files = LiveFiles::where('files_id', $files_id)->first();
+        $live_files = LiveFiles::where('status', $files_id)->first();
         if (!empty($live_files)) {
             $live_files->status = $success == 1 ? LiveFilesEnums\Status::UploadSuccessful->value : LiveFilesEnums\Status::UploadFailed->value;
             $live_files->save();
