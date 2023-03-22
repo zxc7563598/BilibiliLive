@@ -32,13 +32,13 @@ class LiveInstructionController
         $room_id = $param['room_id'];
         // 获取信息
         if (!empty(Redis::hGet(config('app')['app_name'] . ':recorder:list', $room_id))) {
-            $message = '这位主播现在正在直播，请稍等，我会帮你跳转到她的直播间' . "\r\n" . '<br>';
+            $message = '这位主播现在正在直播，请稍等，我会帮你跳转到她的直播间。' . "\r\n" . '<br>';
         } else {
             $live_record = LiveRecord::where('room_id', $room_id)->orderBy('start_time', 'desc')->first();
-            $message = '当前这位主播暂时还没有直播' . "\r\n" . '<br>';
+            $message = '当前这位主播暂时还没有直播。' . "\r\n" . '<br>';
             if (!empty($live_record)) {
-                $message .= '我这边查询到她最后一次直播是在' . Carbon::parse($live_record['start_time'])->timezone(config('app.timezone'))->format('m月d日') . "\r\n" . '<br>';
-                $message .= '那一次他直播了' . sec2Time($live_record['duration']);
+                $message .= '我这边查询到她最后一次直播是在' . Carbon::parse($live_record['start_time'])->timezone(config('app.timezone'))->format('m月d日') . '。' . "\r\n" . '<br>';
+                $message .= '那一次他直播了' . sec2Time($live_record['duration']) . '。';
             }
         }
         return $message;
