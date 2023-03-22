@@ -90,7 +90,7 @@ class LiveInstructionController
             }
             $message .= '是这样的，我这边有查询到：' . $name . ' 在' . Carbon::parse($param['date'])->timezone(config('app.timezone'))->format('m月d日') . '的直播信息。' . "\r\n" . '<br>';
             if ($duration) {
-                $message .= '他在那一天播了' . $live_record->count() . '场。' . "\r\n" . '<br>';
+                $message .= '她在那一天播了' . $live_record->count() . '场。' . "\r\n" . '<br>';
                 if ($live_record->count() == 1) {
                     $message .= Carbon::parse($live_record[0]['start_time'])->timezone(config('app.timezone'))->format('H点i分') . '开始，' . Carbon::parse($live_record[0]['down_time'])->timezone(config('app.timezone'))->format('H点i分') . '结束。' . "\r\n" . '<br>';
                 }
