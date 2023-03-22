@@ -61,7 +61,7 @@ class DanmuMonitoring
                             "时间戳" => $data['result']['timestamp'],
                             "状态" => $data['status']
                         ];
-                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', $data['result']['medal_room']);
+                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
                         $live_danmu = new LiveDanmu();
                         $live_danmu->live_id = $live_id;
                         $live_danmu->manager = $data['result']['manager'];
@@ -88,36 +88,20 @@ class DanmuMonitoring
                             "赠送人名称" => $data['result']['uname'],
                             "状态" => $data['status']
                         ];
-                        $target_id = $data['result']['medal_info']['target_id'];
-                        // 通过 target_id 获取房间号
-                        $room_id = Redis::get(config('app')['app_name'] . ':roomid:' . $target_id);
-                        if (empty($room_id)) {
-                            $live_user = LiveUser::get([
-                                'room_id' => 'room_id',
-                                'target_id' => 'target_id'
-                            ]);
-                            foreach ($live_user as $users) {
-                                $room_id = Redis::set(config('app')['app_name'] . ':roomid:' . $users->target_id, $users->room_id);
-                            }
-                            $room_id = Redis::get(config('app')['app_name'] . ':roomid:' . $target_id);
-                        }
-                        if (!empty($room_id)) {
-                            $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', $room_id);
-                            $live_gift = new LiveGift();
-                            $live_gift->live_id = $live_id;
-                            $live_gift->action = $data['result']['action'];
-                            $live_gift->id = $data['result']['giftId'];
-                            $live_gift->gift_name = $data['result']['giftName'];
-                            $live_gift->gift_type = $data['result']['giftType'];
-                            $live_gift->gift_level = $data['result']['guard_level'];
-                            $live_gift->num = $data['result']['num'];
-                            $live_gift->price = $data['result']['price'];
-                            $live_gift->uid = $data['result']['uid'];
-                            $live_gift->uname = $data['result']['uname'];
-                            $live_gift->status = $data['status'];
-                            $live_gift->save();
-                        }
-
+                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
+                        $live_gift = new LiveGift();
+                        $live_gift->live_id = $live_id;
+                        $live_gift->action = $data['result']['action'];
+                        $live_gift->id = $data['result']['giftId'];
+                        $live_gift->gift_name = $data['result']['giftName'];
+                        $live_gift->gift_type = $data['result']['giftType'];
+                        $live_gift->gift_level = $data['result']['guard_level'];
+                        $live_gift->num = $data['result']['num'];
+                        $live_gift->price = round(($data['result']['price'] * $data['result']['num']) / 10);
+                        $live_gift->uid = $data['result']['uid'];
+                        $live_gift->uname = $data['result']['uname'];
+                        $live_gift->status = $data['status'];
+                        $live_gift->save();
                         break;
                     default:
                         $message = [

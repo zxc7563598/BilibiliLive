@@ -112,3 +112,42 @@ function sec2Time($time): string|bool
         return (bool) false;
     }
 }
+
+/**
+ * 多层数组排序
+ *
+ * @param array $array 数组
+ * @param string $sortRule 排序字段
+ * @param string $order 排序方式
+ * @return array
+ */
+function arraySort($array, $sortRule = "", $order = "asc")
+{
+    if (is_array($sortRule)) {
+        usort($array, function ($a, $b) use ($sortRule) {
+            foreach ($sortRule as $sortKey => $order) {
+                if ($a[$sortKey] == $b[$sortKey]) {
+                    continue;
+                }
+                return (($order == 'desc') ? -1 : 1) * (($a[$sortKey] < $b[$sortKey]) ? -1 : 1);
+            }
+            return 0;
+        });
+    } else
+        if (is_string($sortRule) && !empty($sortRule)) {
+        usort($array, function ($a, $b) use ($sortRule, $order) {
+            if ($a[$sortRule] == $b[$sortRule]) {
+                return 0;
+            }
+            return (($order == 'desc') ? -1 : 1) * (($a[$sortRule] < $b[$sortRule]) ? -1 : 1);
+        });
+    } else {
+        usort($array, function ($a, $b) use ($order) {
+            if ($a == $b) {
+                return 0;
+            }
+            return (($order == 'desc') ? -1 : 1) * (($a < $b) ? -1 : 1);
+        });
+    }
+    return $array;
+}

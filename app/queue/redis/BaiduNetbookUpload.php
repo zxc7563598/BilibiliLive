@@ -28,7 +28,7 @@ class BaiduNetbookUpload implements Consumer
         $local_path = $data['files_path'] . '/' . $data['files_name'];
         $upload_path = $data['files_path'] . '/' . $data['files_name'];
         // 执行 python 脚本
-        $command = 'python3 ' . $python . ' ' . $local_path . ' ' . $upload_path . ' ' . $live_files->files_id . '  > /root/录播上传.log 2>&1 &';
+        $command = 'python3 ' . $python . ' ' . $local_path . ' ' . $upload_path . ' ' . $live_files->files_id . '  > /root/录播上传/' . $live_files->files_id . '.log 2>&1 &';
         exec($command, $output, $return_val);
     }
 }
