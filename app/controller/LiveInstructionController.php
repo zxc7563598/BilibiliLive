@@ -2,18 +2,12 @@
 
 namespace app\controller;
 
-use app\model\LiveDanmu;
-use app\model\LiveFiles;
 use app\model\LiveGift;
 use app\model\LiveRecord;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use support\Redis;
 use support\Request;
-use yzh52521\mailer\Mailer;
-use resource\enums\LiveFilesEnums;
 use support\Db as SupportDb;
-use Webman\RedisQueue\Client;
 
 class LiveInstructionController
 {
@@ -90,11 +84,12 @@ class LiveInstructionController
             }
             $message .= '是这样的，我这边有查询到：' . $name . ' 在' . Carbon::parse($param['date'])->timezone(config('app.timezone'))->format('m月d日') . '的直播信息。' . "\r\n" . '<br>';
             if ($duration) {
-                $message .= '她在那一天播了' . $live_record->count() . '场。' . "\r\n" . '<br>';
+                $message .= '她播了' . $live_record->count() . '场。' . "\r\n" . '<br>';
                 if ($live_record->count() == 1) {
                     $message .= Carbon::parse($live_record[0]['start_time'])->timezone(config('app.timezone'))->format('H点i分') . '开始，' . Carbon::parse($live_record[0]['down_time'])->timezone(config('app.timezone'))->format('H点i分') . '结束。' . "\r\n" . '<br>';
                 }
                 $message .= '共计' . sec2Time($duration) . '。' . "\r\n" . '<br>';
+                $message .= '这些时间段的录屏已经上传到百度网盘，稍后可自行翻阅。' . "\r\n" . '<br>';
             }
             // 弹幕信息
             if (count($live_danmu)) {
@@ -102,7 +97,7 @@ class LiveInstructionController
                 foreach ($live_danmu as $_live_danmu) {
                     $danmu += $_live_danmu['num'];
                 }
-                $message .= '一共有' . count($live_danmu) . '位用户，累计发送了' . $danmu . '条弹幕。';
+                $message .= '在这段时间的直播中，一共有' . count($live_danmu) . '位用户，累计发送了' . $danmu . '条弹幕。';
                 if (count($live_danmu) > 3) {
                     $message .= '其中发言最多的人是：' . $live_danmu[0]['uname'] . '。' . "\r\n" . '<br>';
                     $message .= '他一个人就发送了' . $live_danmu[0]['num'] . '条弹幕。' . "\r\n" . '<br>';
@@ -116,7 +111,7 @@ class LiveInstructionController
             }
             // 礼物信息
             if (count($live_gift)) {
-                $message .= '在那天的直播中，共有' . count($live_gift) . '位用户送出了礼物' . "\r\n" . '<br>';
+                $message .= '在这段时间的直播中，共有' . count($live_gift) . '位用户送出了礼物' . "\r\n" . '<br>';
                 if (count($live_gift) > 3) {
                     $message .= '排名前三位分别为：' . "\r\n" . '<br>';
                     $message .= $live_gift[0]['name'] . '，总计送出了价值' . round(($live_gift[0]['price'] / 100), 2) . '元的礼物。' . "\r\n" . '<br>';

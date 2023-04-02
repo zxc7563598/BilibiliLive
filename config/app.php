@@ -25,4 +25,7 @@ return [
     'controller_reuse' => false,
     'app_name' => getenv('SYSTEM_APP_NAME'),
     'product_name' => getenv('SYSTEM_PRODUCT_NAME'),
+    'aes_key' => getenv('SYSTEM_AES_KEY'),
+    'aes_iv' => getenv('SYSTEM_AES_IV'),
+    'key' => getenv('SYSTEM_KEY'),
 ];
