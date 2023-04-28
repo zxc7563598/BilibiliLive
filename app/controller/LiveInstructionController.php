@@ -2,6 +2,7 @@
 
 namespace app\controller;
 
+use app\model\LiveDanmu;
 use app\model\LiveGift;
 use app\model\LiveRecord;
 use Carbon\Carbon;
@@ -11,6 +12,23 @@ use support\Db as SupportDb;
 
 class LiveInstructionController
 {
+
+    public function imageUpload(Request $request)
+    {
+        $params = $request->all();
+        // 获取参数
+        $base64_str = $params['base64_str'];
+        $ImageStorageBase64 = ImageStorageBase64((public_path() . '/files/'), $base64_str);
+        // 返回数据
+        return json([
+            'code' => 200,
+            'msg' => 'success',
+            'data' => [
+                'attach_url' => 'http://test.hejunjie.club/',
+                'attach_img_src' => 'files/' . $ImageStorageBase64
+            ]
+        ], JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES + JSON_PRESERVE_ZERO_FRACTION);
+    }
 
     /**
      * 获取特定主播当前是否在直播

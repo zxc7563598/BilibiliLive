@@ -40,10 +40,11 @@ class DanmuMonitoring
 
     public static function init()
     {
-        $con = new AsyncTcpConnection('ws://47.243.105.184:23333/danmu/sub');
+        $con = new AsyncTcpConnection('ws://127.0.0.1:23333/danmu/sub');
         $con->onConnect = function (AsyncTcpConnection $con) {
             $con->send('hello');
             sublog('长链接测试', '弹幕机链接', '连接成功了');
+            sublog('长链接测试', '原始数据', '连接成功了');
         };
         $con->onMessage = function (AsyncTcpConnection $con, $data) {
             $data = json_decode($data, true);
@@ -54,7 +55,9 @@ class DanmuMonitoring
                         $message = [
                             '类型' => "弹幕",
                             "房管" => $data['result']['manager'],
-                            "等级" => $data['result']['medal_level'],
+                            '牌子主播' => $data['result']['medal_anchor'],
+                            '牌子名称' => $data['result']['medal_name'],
+                            "牌子等级" => $data['result']['medal_level'],
                             "舰长类型" => $data['result']['uguard'],
                             "名称" => $data['result']['uname'],
                             "发送信息" => $data['result']['msg'],
@@ -65,7 +68,9 @@ class DanmuMonitoring
                         $live_danmu = new LiveDanmu();
                         $live_danmu->live_id = $live_id;
                         $live_danmu->manager = $data['result']['manager'];
-                        $live_danmu->level = $data['result']['medal_level'];
+                        $live_danmu->medal_anchor = $data['result']['medal_anchor'];
+                        $live_danmu->medal_name = $data['result']['medal_name'];
+                        $live_danmu->medal_level = $data['result']['medal_level'];
                         $live_danmu->uguard = $data['result']['uguard'];
                         $live_danmu->uid = $data['result']['uid'];
                         $live_danmu->uname = $data['result']['uname'];
@@ -111,10 +116,12 @@ class DanmuMonitoring
                         break;
                 }
                 sublog('长链接测试', '弹幕机链接', $message);
+                sublog('长链接测试', '原始数据', $data);
             }
         };
         $con->onClose = function (AsyncTcpConnection $con, $data) {
             sublog('长链接测试', '弹幕机链接', '链接断开，重新连接');
+            sublog('长链接测试', '原始数据', '链接断开，重新连接');
             self::init();
         };
         $con->connect();

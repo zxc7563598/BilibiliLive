@@ -28,6 +28,9 @@ class UsersController
         // 获取数据
         $type = $param['type'];
         $content = $param['content'];
+        if (empty($content)) {
+            return fail($request, 800005);
+        }
         $real_name = '匿名用户' . Carbon::now()->timezone(config('app.timezone'))->timestamp . mt_rand(1000, 9999);
         // 存储投稿
         $question_box = new QuestionBox();
@@ -40,7 +43,7 @@ class UsersController
             $url = 'https://api.ip138.com/ip/?ip=' . $user_ip . '&datatype=jsonp&token=a1eeb621116ed48d0b5cd9d1069a3694';
             $ip_data = Network\Curl::Get($url, 'json');
             if ($ip_data['code'] == 200) {
-                $address = json_decode($ip_data['data'],true);
+                $address = json_decode($ip_data['data'], true);
                 if (!empty($address['data'][0])) {
                     $question_box->ip_address = $address['data'][0];
                 }

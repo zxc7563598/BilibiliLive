@@ -16,7 +16,7 @@ final class CreateBiliQuestionAdmin extends AbstractMigration
         $table->addColumn('admin_id', 'uuid', ['comment' => '管理员id', 'null' => false])
             ->addColumn('account', 'string', ['comment' => '账号', 'null' => true])
             ->addColumn('password', 'string', ['comment' => '密码', 'null' => true])
-            ->addColumn('salt', 'integer', ['comment' => '扰乱码', 'null' => true, 'limit' => MysqlAdapter::INT_TINY])
+            ->addColumn('salt', 'integer', ['comment' => '扰乱码', 'null' => true, 'limit' => MysqlAdapter::INT_MEDIUM])
             ->addColumn('token', 'string', ['comment' => '登陆凭证', 'null' => true])
             ->addColumn('last_login_at', 'integer', ['comment' => '最后登录时间', 'null' => true, 'limit' => MysqlAdapter::INT_BIG])
             ->addColumn('last_login_ip', 'string', ['comment' => '最后登录ip', 'null' => true])

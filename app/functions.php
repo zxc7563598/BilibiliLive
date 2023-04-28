@@ -5,6 +5,31 @@ use Webman\Http\Response;
 
 
 /**
+ * base64图片存储
+ *
+ * @param string $path 文件路径
+ * @param string $base64 图片Base64
+ * @return void
+ */
+function ImageStorageBase64($path, $base64)
+{
+    ini_set('pcre.backtrack_limit', -1);
+    if (!file_exists($path)) {
+        mkdir($path, 0774, true);
+    }
+    // 匹配出图片的格式
+    $result = [];
+    if (preg_match('/^(data:\s*((image)|(application))\/(\S+);base64,)/', $base64, $result)) {
+        $type = $result[5];
+        $save_file = ((microtime(true) * 10000) . '.' . $type);
+        if (file_put_contents($path . $save_file, base64_decode(str_replace($result[1], '', $base64)))) {
+            return $save_file;
+        }
+    }
+    return false;
+}
+
+/**
  * 日志信息存储
  *
  * @param string $paths 存储路径
