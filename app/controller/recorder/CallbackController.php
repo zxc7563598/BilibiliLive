@@ -20,10 +20,10 @@ class CallbackController
      * 
      * @return string
      */
-    public function 录播姬接口webHook(Request $request): string
+    public function webHook(Request $request): string
     {
         $param = $request->all();
-        sublog('', '录播姬回调', $param);
+        sublog('录播姬接口', '录播姬回调', $param);
         sublog('录播姬接口', '录播姬回调', $request->getRealIp());
         sublog('录播姬接口', '录播姬回调', '===================');
         $type = $param['EventType'];
@@ -125,21 +125,27 @@ class CallbackController
                     $live_files->save();
                     // 上传到哔哩哔哩
                     sublog('biliup', '上传确认', $live_files->files_name . '录制完成，检查视频是否需要投稿');
-                    if ($live_files->duration > 300) {
+                    if ($live_files->duration > 1200) {
                         sublog('biliup', '上传确认', '视频可以进行投稿，进行信息获取');
                         $file = $live_files->files_path . '/' . $live_files->files_name;
-                        $title = '【直播回放】你的温柔姐姐 ' . Carbon::parse($timestamp)->timezone(config('app')['default_timezone'])->format('Y年m月d日H') . '点场';
-                        $log = base_path() . '/runtime/biliup_log/' . $title;
+                        $title = '【直播回放】温以凝 ' . Carbon::parse($live_files->start_time)->timezone(config('app')['default_timezone'])->format('Y年m月d日H') . '点场';
+                        $log = base_path() . '/runtime/logs/' . Carbon::now()->timezone(config('app')['default_timezone'])->format('Y-m-d') . '/biliup/视频上传.log';
+                        $dtime = Carbon::now()->addHours(5)->timezone(config('app')['default_timezone'])->timestamp;
+                        $desc = '关注主播「温以凝」好吗，求求了求求了求求了';
                         sublog('biliup', '上传确认', '投稿视频路径：' . $file);
                         sublog('biliup', '上传确认', '投稿名称：' . $title);
                         sublog('biliup', '上传确认', '打印日志地址：' . $log);
                         if (!is_dir(base_path() . '/runtime/biliup_log/')) {
                             mkdir(base_path() . '/runtime/biliup_log/', 0777, true);
                         }
-                        $shell = 'biliup upload ' . $file . ' --tid 27 --tag 直播回放 --title ' . $title . ' --cover /www/wwwdata/封面.jpeg --line kodo &>> ' . $log . ' &';
+                        $shell = 'biliup upload ' . $file . ' --tid 27 --tag 直播回放 --title "' . $title . '" --cover /www/wwwdata/封面.jpeg --dtime ' . $dtime . ' --line kodo --desc "' . $desc . '" &>> ' . $log . ' &';
                         sublog('biliup', '上传确认', '执行命令' . $shell);
+                        $dir = '/root'; // 指定要执行命令的目录
+                        chdir($dir); // 更改当前工作目录为指定的目录
+                        $output = shell_exec($shell); // 执行 shell 命令
+                        sublog('biliup', '上传确认', $output);
                     } else {
-                        sublog('biliup', '上传确认', '视频时长不超过300秒，不进行投稿');
+                        sublog('biliup', '上传确认', '视频时长不超过1200秒，不进行投稿');
                     }
                     sublog('biliup', '上传确认', '==========');
                 }
