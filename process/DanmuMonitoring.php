@@ -108,6 +108,22 @@ class DanmuMonitoring
                         $live_gift->status = $data['status'];
                         $live_gift->save();
                         break;
+                    case 'superchat':
+                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
+                        $live_gift = new LiveGift();
+                        $live_gift->live_id = $live_id;
+                        $live_gift->action = '发送';
+                        $live_gift->id = $data['result']['gift']['gift_id'];
+                        $live_gift->gift_name = $data['result']['gift']['gift_name'];
+                        $live_gift->gift_type = 0;
+                        $live_gift->gift_level = 0;
+                        $live_gift->num = 1;
+                        $live_gift->price = $data['result']['price'] * 100;
+                        $live_gift->uid = $data['result']['uid'];
+                        $live_gift->uname = $data['result']['user_info']['uname'];
+                        $live_gift->status = $data['status'];
+                        $live_gift->save();
+                        break;
                     default:
                         $message = [
                             "类型" => "未定义",

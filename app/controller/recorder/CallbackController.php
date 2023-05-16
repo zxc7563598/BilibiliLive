@@ -3,6 +3,7 @@
 namespace app\controller\recorder;
 
 use app\model\LiveFiles;
+use app\model\LiveGift;
 use app\model\LiveRecord;
 use Carbon\Carbon;
 use support\Redis;
@@ -125,7 +126,7 @@ class CallbackController
                     $live_files->save();
                     // 上传到哔哩哔哩
                     sublog('biliup', '上传确认', $live_files->files_name . '录制完成，检查视频是否需要投稿');
-                    if ($live_files->duration > 1200) {
+                    if ($live_files->duration > 30) {
                         sublog('biliup', '上传确认', '视频可以进行投稿，进行信息获取');
                         $file = $live_files->files_path . '/' . $live_files->files_name;
                         $title = '【直播回放】温以凝 ' . Carbon::parse($live_files->start_time)->timezone(config('app')['default_timezone'])->format('Y年m月d日H') . '点场';
@@ -145,7 +146,7 @@ class CallbackController
                         $output = shell_exec($shell); // 执行 shell 命令
                         sublog('biliup', '上传确认', $output);
                     } else {
-                        sublog('biliup', '上传确认', '视频时长不超过1200秒，不进行投稿');
+                        sublog('biliup', '上传确认', '视频时长不超过30秒，不进行投稿');
                     }
                     sublog('biliup', '上传确认', '==========');
                 }
@@ -157,17 +158,8 @@ class CallbackController
     public function webHookTest(Request $request)
     {
         $param = $request->all();
-        $live_files_list = LiveFiles::whereIn('files_id', $param['files_id'])->get();
-        $res = [];
-        foreach ($live_files_list as $live_files) {
-            $res[] = $live_files;
-            Client::send('baidu-netbook-upload', [
-                'files_id' => $live_files->files_id,
-                'files_path' => $live_files->files_path,
-                'files_name' => $live_files->files_name
-            ]);
-        }
-        return success($request, $res);
+        $i = 0;
+        return success($request, $i);
     }
 
     /**
