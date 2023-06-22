@@ -64,7 +64,8 @@ class DanmuMonitoring
                             "时间戳" => $data['result']['timestamp'],
                             "状态" => $data['status']
                         ];
-                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
+                        $room_id = Redis::get(config('app')['app_name'] . ':recorder:roomid');
+                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', $room_id);
                         $live_danmu = new LiveDanmu();
                         $live_danmu->live_id = $live_id;
                         $live_danmu->manager = $data['result']['manager'];
@@ -93,7 +94,8 @@ class DanmuMonitoring
                             "赠送人名称" => $data['result']['uname'],
                             "状态" => $data['status']
                         ];
-                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
+                        $room_id = Redis::get(config('app')['app_name'] . ':recorder:roomid');
+                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', $room_id);
                         $live_gift = new LiveGift();
                         $live_gift->live_id = $live_id;
                         $live_gift->action = $data['result']['action'];
@@ -109,7 +111,8 @@ class DanmuMonitoring
                         $live_gift->save();
                         break;
                     case 'superchat':
-                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
+                        $room_id = Redis::get(config('app')['app_name'] . ':recorder:roomid');
+                        $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', $room_id);
                         $live_gift = new LiveGift();
                         $live_gift->live_id = $live_id;
                         $live_gift->action = '发送';

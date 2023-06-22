@@ -2,6 +2,7 @@
 
 namespace app\controller\recorder;
 
+use app\model\LiveDanmu;
 use app\model\LiveFiles;
 use app\model\LiveGift;
 use app\model\LiveRecord;
@@ -44,6 +45,7 @@ class CallbackController
                 $live_record->down_time = 0;
                 $live_record->duration = 0;
                 $live_record->save();
+                Redis::set(config('app')['app_name'] . ':recorder:roomid', $data['RoomId']);
                 Redis::hSet(config('app')['app_name'] . ':recorder:list', $data['RoomId'], $live_record->live_id);
                 Mailer::setFrom(['992182040@qq.com' => "哔哩哔哩直播间通知"])
                     ->setTo('junjie.he.925@gmail.com')
@@ -69,6 +71,7 @@ class CallbackController
                     $live_record->duration = $live_record->down_time - $live_record->start_time;
                     $live_record->save();
                 }
+                Redis::del(config('app')['app_name'] . ':recorder:roomid');
                 Redis::hDel(config('app')['app_name'] . ':recorder:list', $data['RoomId']);
                 Mailer::setFrom(['992182040@qq.com' => "哔哩哔哩直播间通知"])
                     ->setTo('junjie.he.925@gmail.com')
@@ -157,9 +160,96 @@ class CallbackController
 
     public function webHookTest(Request $request)
     {
-        $param = $request->all();
-        $i = 0;
-        return success($request, $i);
+        $data = $request->all();
+        $message = [];
+        $cmd = '';
+        if ($data) {
+            $cmd = $data['cmd'];
+            switch ($data['cmd']) {
+                case 'danmu': // 弹幕
+                    $message = [
+                        '类型' => "弹幕",
+                        "房管" => $data['result']['manager'],
+                        '牌子主播' => $data['result']['medal_anchor'],
+                        '牌子名称' => $data['result']['medal_name'],
+                        "牌子等级" => $data['result']['medal_level'],
+                        "舰长类型" => $data['result']['uguard'],
+                        "名称" => $data['result']['uname'],
+                        "发送信息" => $data['result']['msg'],
+                        "时间戳" => $data['result']['timestamp'],
+                        "状态" => $data['status']
+                    ];
+                    $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
+                    $live_danmu = new LiveDanmu();
+                    $live_danmu->live_id = $live_id;
+                    $live_danmu->manager = $data['result']['manager'];
+                    $live_danmu->medal_anchor = $data['result']['medal_anchor'];
+                    $live_danmu->medal_name = $data['result']['medal_name'];
+                    $live_danmu->medal_level = $data['result']['medal_level'];
+                    $live_danmu->uguard = $data['result']['uguard'];
+                    $live_danmu->uid = $data['result']['uid'];
+                    $live_danmu->uname = $data['result']['uname'];
+                    $live_danmu->msg = $data['result']['msg'];
+                    $live_danmu->timestamp = round(($data['result']['timestamp'] / 1000));
+                    $live_danmu->status = $data['status'];
+                    $live_danmu->save();
+                    break;
+                case 'gift':
+                    $message = [
+                        '类型' => "礼物",
+                        "赠送类型" => $data['result']['action'],
+                        "礼物id" => $data['result']['giftId'],
+                        "礼物名称" => $data['result']['giftName'],
+                        "看起来是是否免费" => $data['result']['giftType'],
+                        "礼物级别" => $data['result']['guard_level'],
+                        "数量" => $data['result']['num'],
+                        "价格" => $data['result']['price'],
+                        "赠送人uid" => $data['result']['uid'],
+                        "赠送人名称" => $data['result']['uname'],
+                        "状态" => $data['status']
+                    ];
+                    $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
+                    $live_gift = new LiveGift();
+                    $live_gift->live_id = $live_id;
+                    $live_gift->action = $data['result']['action'];
+                    $live_gift->id = $data['result']['giftId'];
+                    $live_gift->gift_name = $data['result']['giftName'];
+                    $live_gift->gift_type = $data['result']['giftType'];
+                    $live_gift->gift_level = $data['result']['guard_level'];
+                    $live_gift->num = $data['result']['num'];
+                    $live_gift->price = round(($data['result']['price'] * $data['result']['num']) / 10);
+                    $live_gift->uid = $data['result']['uid'];
+                    $live_gift->uname = $data['result']['uname'];
+                    $live_gift->status = $data['status'];
+                    $live_gift->save();
+                    break;
+                case 'superchat':
+                    $live_id = Redis::hGet(config('app')['app_name'] . ':recorder:list', '26507836');
+                    $live_gift = new LiveGift();
+                    $live_gift->live_id = $live_id;
+                    $live_gift->action = '发送';
+                    $live_gift->id = $data['result']['gift']['gift_id'];
+                    $live_gift->gift_name = $data['result']['gift']['gift_name'];
+                    $live_gift->gift_type = 0;
+                    $live_gift->gift_level = 0;
+                    $live_gift->num = 1;
+                    $live_gift->price = $data['result']['price'] * 100;
+                    $live_gift->uid = $data['result']['uid'];
+                    $live_gift->uname = $data['result']['user_info']['uname'];
+                    $live_gift->status = $data['status'];
+                    $live_gift->save();
+                    break;
+                default:
+                    $message = [
+                        "类型" => "未定义",
+                        "内容" => $data
+                    ];
+                    break;
+            }
+            sublog('长链接测试', '弹幕机链接', $message);
+            sublog('长链接测试', '原始数据', $data);
+        }
+        return success($request, $cmd);
     }
 
     /**

@@ -12,6 +12,6 @@ return [
     ],
     'from'   => [
         'address' => 'junjie.he.925@gmail.com',
-        'name'    => '26507836-尤狸直播间状态变更',
+        'name'    => '30118851-温以凝直播间状态变更',
     ],
 ];
