@@ -40,7 +40,10 @@ return [
             ]
         ]
     ],
-    'danmu' => [
-        'handler' => process\DanmuMonitoring::class,
+    // 'danmu' => [
+    //     'handler' => process\DanmuMonitoring::class
+    // ],
+    'bili_websocket' => [
+        'handler' => process\BiliWebsocket::class
     ]
 ];

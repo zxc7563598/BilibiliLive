@@ -18,6 +18,7 @@ use Webman\Route;
 // Route::options('[{path:.+}]', function (){
 //     return response('');
 // });
+Route::any('/testPage', [app\controller\box\UsersController::class, 'testPage']); // 用户投稿
 
 route::any('/user/user_img_upload', [app\controller\LiveInstructionController::class, 'imageUpload']); // %E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0
 

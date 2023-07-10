@@ -7,6 +7,10 @@ use Carbon\Carbon;
 use support\Request;
 use Webman\Http\Response;
 use Suqingan\Network;
+use Workerman\Connection\AsyncTcpConnection;
+use Workerman\Connection\TcpConnection;
+use Workerman\Timer;
+use Workerman\Worker;
 
 class UsersController
 {
@@ -61,5 +65,15 @@ class UsersController
         $question_box->save();
         // 返回数据
         return success($request, $param);
+    }
+
+    public function testPage(Request $request)
+    {
+        // self::init(30118851);
+        $data = Network\Curl::Get('http://127.0.0.1:23333/sendMsg?room_id=30118851&msg=哦豁', 'json');
+        return view('index/test', [
+            'buffer' => json_encode(''),
+            'data' => json_encode($data)
+        ]);
     }
 }

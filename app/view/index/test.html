@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <?=htmlspecialchars($buffer)?>
+    <br>
+    <hr>
+    <br>
+    <?=htmlspecialchars($data)?>
+    <script>
+        let json = JSON.stringify({ "uid": 0, "roomid": 30118851, "protover": 3, "platform": "web", "type": 2, "key": 0 });
+        console.log('json', json);
+        let encoder = new TextEncoder(); //编码器
+        let jsonView = encoder.encode(json); //utf-8编码
+        console.log('jsonView', jsonView);
+        let buff = new ArrayBuffer(jsonView.byteLength + 16); //数据包总长度：16位头部长度+bytes长度
+        console.log('buff', jsonView.byteLength)
+        console.log('buff', buff);
+        let view = new DataView(buff); //新建操作视窗
+        view.setUint32(0, jsonView.byteLength + 16); //整个数据包长度
+        view.setUint16(4, 16); //头部长度
+        view.setUint16(6, 1); //协议版本
+        view.setUint32(8, 7); //类型,7为加入房间认证
+        view.setUint32(12, 1); //填1
+        for (let r = 0; r < jsonView.byteLength; r++) {
+            view.setUint8(16 + r, jsonView[r]); //填入数据
+        }
+        console.log('buff', buff);
+        
+		// var ws = new WebSocket('wss://broadcastlv.chat.bilibili.com:443/sub');
+		// ws.onopen = function(e) {
+		// 	ws.send(buff);
+        // }
+    </script>
+</body>
+
+</html>

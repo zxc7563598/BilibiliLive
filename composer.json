@@ -40,7 +40,9 @@
     "nesbot/carbon": "^2.66",
     "suqingan/network": "^1.03",
     "ramsey/uuid": "^3.9",
-    "yzh52521/webman-mailer": "^1.1"
+    "yzh52521/webman-mailer": "^1.1",
+    "vdechenaux/brotli": "^1.2",
+    "vdechenaux/brotli-bin-amd64": "^1.0"
   },
   "suggest": {
     "ext-event": "For better performance. "
